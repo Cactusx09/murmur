@@ -746,6 +746,48 @@ $(document).ready(function () {
       $(this).addClass('_active');
     });
   }
+
+  if($('#upload_logo').length){
+    var options =
+        {
+          thumbBox: '.g_file__box',
+          spinner: '.spinner',
+          imgSrc: $('#upload_logo').data('src')
+        }
+    var cropper = $('.s_register__form_file').cropbox(options);
+    $('#input').on('change', function(){
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        options.imgSrc = e.target.result;
+        cropper = $('.s_register__form_file').cropbox(options);
+        $('.g_file__box').removeClass('_disabled');
+      }
+      reader.readAsDataURL(this.files[0]);
+      this.files = [];
+    });
+    $('.g_file__btns_edit').click(function(e){
+      e.preventDefault();
+      $('.g_file__input').trigger('click');
+    });
+    $('.g_file__btns_del').click(function(e){
+      e.preventDefault();
+      options.imgSrc = 'images/shelters-logo-empty.png';
+      cropper = $('.s_register__form_file').cropbox(options);
+      $('.g_file__box').addClass('_disabled');
+    });
+    $('.g_file__btns_add').on('click', function(e){
+      e.preventDefault();
+      var img = cropper.getDataURL();
+      $('.g_file__thumbs').append('<img src="'+img+'">');
+    })
+    $('.g_file__btns_in').on('click', function(){
+      cropper.zoomIn();
+    })
+    $('.g_file__btns_out').on('click', function(){
+      cropper.zoomOut();
+    })
+  }
+
 });
 //gmap init
 function mapInitialize(el_id) {
@@ -1045,3 +1087,5 @@ if (getMobileOperatingSystem()) {
     }
   } catch (ex) {}
 }
+
+
