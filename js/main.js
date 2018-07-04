@@ -260,10 +260,6 @@ $(document).ready(function () {
   $('._open_pop').click(function(e){
     e.preventDefault();
     var visible = $('.popup._visible');
-    visible.addClass('_back');
-    setTimeout(function(){
-      visible.removeClass('_visible _back');
-    },700);
     var name = $(this).data('name'),
         txt = $(this).data('txt'),
         help = $(this).data('help'),
@@ -272,6 +268,12 @@ $(document).ready(function () {
         popup_w = popup.outerWidth(),
         h = $(window).height(),
         px = window.pageYOffset + h/2 - popup_h/2;
+    if(name!="upload"){
+      visible.addClass('_back');
+      setTimeout(function(){
+        visible.removeClass('_visible _back');
+      },700);
+    }
     popup.css({
       'top': px+'px',
       'margin-left': '-'+ popup_w/2 +'px',
@@ -289,12 +291,20 @@ $(document).ready(function () {
   });
   $('.overlay, ._close_pop').click(function(e){
     e.preventDefault();
-    $('.popup._visible').addClass('_back');
-    $('.overlay').removeClass('_visible');
-    $('.s_inner__left').removeClass('_active');
-    setTimeout(function(){
-      $('.popup._visible').removeClass('_visible _back');
-    },500);
+    if($('.popup_upload').hasClass('_visible')){
+      $('.popup_upload._visible').addClass('_back');
+      $('#input').val('');
+      setTimeout(function(){
+        $('.popup_upload._visible').removeClass('_visible _back');
+      },500);
+    }else{
+      $('.popup._visible').addClass('_back');
+      $('.overlay').removeClass('_visible');
+      $('.s_inner__left').removeClass('_active');
+      setTimeout(function(){
+        $('.popup._visible').removeClass('_visible _back');
+      },500);
+    }
   });
 
   //validate
@@ -748,45 +758,111 @@ $(document).ready(function () {
   }
 
   if($('#upload_logo').length){
-    var options =
-        {
-          thumbBox: '.g_file__box',
-          spinner: '.spinner',
-          imgSrc: $('#upload_logo').data('src')
-        }
-    var cropper = $('.s_register__form_file').cropbox(options);
-    $('#input').on('change', function(){
+    //cropper options
+    var src = $('#upload_logo').data('src');
+    var options = {
+      thumbBox: '.g_file__box_crop',
+      imgSrc: ''
+    }
+    var uploadTxt = "фото";
+    if($('#upload_logo').closest('.s_register__body')){
+      uploadTxt = "лого";
+    }
+    if(src){
+      options.imgSrc = src;
+    }
+    //cropper object
+    var cropper = $('#upload_logo').cropbox(options);
+    $('#upload_logo').bind("mousewheel", function () {
+      return false;
+    });
+    var n = 0;
+    //when file input changed
+    $('.popup_upload .g_file__input, .s_register__body .g_file__input').on('change', function(){
       var reader = new FileReader();
       reader.onload = function(e) {
         options.imgSrc = e.target.result;
-        cropper = $('.s_register__form_file').cropbox(options);
-        $('.g_file__box').removeClass('_disabled');
+        cropper = $('#upload_logo').cropbox(options);
+        $('#upload_logo p').remove();
+        //remove event when uploaded
+        $('#upload_logo').off('click',triggerClick).removeClass('_disabled');
+        n=0;
       }
       reader.readAsDataURL(this.files[0]);
       this.files = [];
     });
-    $('.g_file__btns_edit').click(function(e){
-      e.preventDefault();
-      $('.g_file__input').trigger('click');
-    });
+    //add file when click on box
+    if(!src){
+      $('#upload_logo').on('click',triggerClick);
+    }
+    //add file btn
+    $('.g_file__btns_edit').on('click',triggerClick);
     $('.g_file__btns_del').click(function(e){
       e.preventDefault();
-      options.imgSrc = 'images/shelters-logo-empty.png';
-      cropper = $('.s_register__form_file').cropbox(options);
-      $('.g_file__box').addClass('_disabled');
+      n++;
+      cropper = $('#upload_logo').cropbox(options);
+      if(!$('#upload_logo p').length){
+        $('#upload_logo').append('<p><span>загрузить '+uploadTxt+'</span><i><svg xmlns="http://www.w3.org/2000/svg" width="13" viewBox="0 0 13 13"><path d="M11.9 13L1.1 13C0.5 13 0 12.5 0 11.9L0 8C0 7.8 0.2 7.7 0.4 7.7L1.9 7.7C2.1 7.7 2.3 7.8 2.3 8L2.3 10.7 10.7 10.7 10.7 8C10.7 7.8 10.9 7.7 11.1 7.7L12.6 7.7C12.8 7.7 13 7.8 13 8L13 11.9C13 12.5 12.5 13 11.9 13ZM6.8 9.8C6.7 10 6.4 10 6.2 9.8L2.4 5.2C2.2 5 2.3 4.6 2.7 4.6L4.6 4.6 4.6 0.4C4.6 0.2 4.7 0 5 0L8 0C8.3 0 8.4 0.2 8.4 0.4L8.4 4.6 10.3 4.6C10.7 4.6 10.8 5 10.6 5.2L6.8 9.8Z" fill="rgb(36, 91, 171)"/></svg></i></p>');
+      }
+      if(n<=1){
+        $('#upload_logo').on('click',triggerClick).addClass('_disabled');
+      }
     });
-    $('.g_file__btns_add').on('click', function(e){
-      e.preventDefault();
+    $('.g_file__btns_add').on('click', function(){
       var img = cropper.getDataURL();
-      $('.g_file__thumbs').append('<img src="'+img+'">');
+      $('.popup._visible .g_file__thumbs').append('<div class="g_file__thumbs_item" style="background-image: url('+img+');"><div class="g_file__thumbs_itemDel">&times;</div></div>');
+      n++;
+      cropper = $('#upload_logo').cropbox(options);
+      if(!$('#upload_logo p').length){
+        $('#upload_logo').append('<p><span>загрузить '+uploadTxt+'</span><i><svg xmlns="http://www.w3.org/2000/svg" width="13" viewBox="0 0 13 13"><path d="M11.9 13L1.1 13C0.5 13 0 12.5 0 11.9L0 8C0 7.8 0.2 7.7 0.4 7.7L1.9 7.7C2.1 7.7 2.3 7.8 2.3 8L2.3 10.7 10.7 10.7 10.7 8C10.7 7.8 10.9 7.7 11.1 7.7L12.6 7.7C12.8 7.7 13 7.8 13 8L13 11.9C13 12.5 12.5 13 11.9 13ZM6.8 9.8C6.7 10 6.4 10 6.2 9.8L2.4 5.2C2.2 5 2.3 4.6 2.7 4.6L4.6 4.6 4.6 0.4C4.6 0.2 4.7 0 5 0L8 0C8.3 0 8.4 0.2 8.4 0.4L8.4 4.6 10.3 4.6C10.7 4.6 10.8 5 10.6 5.2L6.8 9.8Z" fill="rgb(36, 91, 171)"/></svg></i></p>');
+      }
+      if(n<=1){
+        $('#upload_logo').on('click',triggerClick).addClass('_disabled');
+      }
+      $('#input').val('');
+      $('.g_file__thumbs_itemDel').click(function(e){
+        e.preventDefault();
+        $(this).parent().remove();
+      });
     })
-    $('.g_file__btns_in').on('click', function(){
+    $('.g_file__btns_in').on('click', function(e){
+      e.preventDefault();
       cropper.zoomIn();
     })
-    $('.g_file__btns_out').on('click', function(){
+    $('.g_file__btns_out').on('click', function(e){
+      e.preventDefault();
       cropper.zoomOut();
     })
+    function triggerClick(){
+      $('.g_file__input').trigger('click');
+    }
+    $('.g_file__btns a').click(function(e){
+      e.preventDefault();
+    })
+    $('.g_file__btns_save').on('click', function(e){
+      e.preventDefault();
+      var img = cropper.getDataURL();
+      $('.popup._visible .g_file__thumbs').append('<div class="g_file__thumbs_item" style="background-image: url('+img+');"><div class="g_file__thumbs_itemDel">&times;</div></div>');
+      n++;
+      cropper = $('#upload_logo').cropbox(options);
+      if(!$('#upload_logo p').length){
+        $('#upload_logo').append('<p><span>загрузить '+uploadTxt+'</span><i><svg xmlns="http://www.w3.org/2000/svg" width="13" viewBox="0 0 13 13"><path d="M11.9 13L1.1 13C0.5 13 0 12.5 0 11.9L0 8C0 7.8 0.2 7.7 0.4 7.7L1.9 7.7C2.1 7.7 2.3 7.8 2.3 8L2.3 10.7 10.7 10.7 10.7 8C10.7 7.8 10.9 7.7 11.1 7.7L12.6 7.7C12.8 7.7 13 7.8 13 8L13 11.9C13 12.5 12.5 13 11.9 13ZM6.8 9.8C6.7 10 6.4 10 6.2 9.8L2.4 5.2C2.2 5 2.3 4.6 2.7 4.6L4.6 4.6 4.6 0.4C4.6 0.2 4.7 0 5 0L8 0C8.3 0 8.4 0.2 8.4 0.4L8.4 4.6 10.3 4.6C10.7 4.6 10.8 5 10.6 5.2L6.8 9.8Z" fill="rgb(36, 91, 171)"/></svg></i></p>');
+      }
+      if(n<=1){
+        $('#upload_logo').on('click',triggerClick).addClass('_disabled');
+      }
+      $('#input').val('');
+      $('.popup_upload._visible').addClass('_back');
+      setTimeout(function(){
+        $('.popup_upload._visible').removeClass('_visible _back');
+      },500);
+
+      $('.g_file__thumbs_itemDel').click(function(){
+        $(this).parent().remove();
+      });
+    });
   }
+
 
 });
 //gmap init

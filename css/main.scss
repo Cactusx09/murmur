@@ -1502,8 +1502,34 @@ section {
     cursor: grab;
     cursor: move;
     cursor: -webkit-grab;
+    border-radius: 0.313rem;
+    border: 0.125rem solid #e0ecf6;
+    background-color: #ffffff;
+    height: 136px;
+    @include flex(c,c);
+    position: relative;
+    p{
+      font-weight: 700;
+      color: $b;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      @include flex(c,c);
+      i{
+        margin-left: 7px;
+        margin-top: -2px;
+      }
+    }
+    &_crop{
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      left: 0;
+      top: 0;
+    }
     &._disabled{
-      pointer-events: none;
+//      pointer-events: none;
+      background-image: none !important;
+      cursor: pointer;
       background-position: center !important;
     }
   }
@@ -1519,6 +1545,33 @@ section {
     cursor: move;
     cursor: -webkit-grab;
   }
+  &__thumbs{
+    @include flex(fs,c,$w:w);
+    margin: 10px -2px 2px;
+    &_item{
+      margin: 2px;
+      height: 100px;
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+      width: calc(33.333333% - 4px);
+      position: relative;
+      &Del{
+        position: absolute;
+        right: 5px;
+        top: 5px;
+        font-size: 2.7rem;
+        line-height: .7;
+        cursor: pointer;
+        z-index: 9;
+        color: #fff;
+        transition: $t;
+        &:hover{
+          color: $o;
+        }
+      }
+    }
+  }
   &__btns{
     @include flex(fe,c);
     margin-top: .5rem;
@@ -1527,7 +1580,29 @@ section {
     }
     a{
       &:not(:last-of-type){
-        margin-right: .7rem;
+        margin-right: 1.2rem;
+      }
+    }
+    span{
+      font-size: .9rem;
+      color: $d;
+      margin-left: 5px;
+    }
+    &_save{
+      span{
+        color: #69b92e;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+    }
+    &_edit{
+      span{
+        color: $b;
+      }
+    }
+    &_del{
+      span{
+        color: $o;
       }
     }
   }
@@ -4161,9 +4236,10 @@ section {
     }
     &__left{
       margin-right: 2.3rem;
+      min-width: 45%;
       .s_register__form_file{
-        min-width: 300px;
-        height: 250px;
+        min-width: 200px;
+        height: 100px;
         background-color: $bg;
       }
     }
@@ -4307,6 +4383,21 @@ section {
     .g_title{
       line-height: 1;
       margin-bottom: 1rem;
+    }
+  }
+
+  &_upload{
+    @include flex(fs,fs,$d:c);
+    width: 1200px;
+    max-width: 100%;
+    height: 800px;
+    .g_file{
+      flex-grow: 2;
+      height: 100%;
+    }
+    .s_register__form_file{
+      height: 100%;
+      flex-grow: 2;
     }
   }
 
